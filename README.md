@@ -333,6 +333,8 @@ or optional settings when function is passed for `target` parameter. See `wrap` 
 Returns wrapping function when `target` is a function,
 or a function that restores original method(s) when `target` is an object.
 
+See `doc` folder for details.
+
 ## Related projects <a name="related"></a> [&#x2191;](#start)
 
 * [eva](https://github.com/gamtiq/eva)

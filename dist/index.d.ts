@@ -1,16 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-export type TargetFunction = (...args: any[]) => any;
-
-export type AnyObject = {
+export declare type TargetFunction = (...args: any[]) => any;
+export declare type AnyObject = {
     [field in (number | string)]: any;
 };
-
-export type TargetObject = AnyObject;
-export type SaveObject = AnyObject;
-
-export type Target = TargetObject | TargetFunction;
-
+export declare type TargetObject = AnyObject;
+export declare type SaveObject = AnyObject;
+export declare type Target = TargetObject | TargetFunction;
 /** Handler's parameter. */
 export interface HandlerParam {
     /** Array of arguments that were passed to the wrapping function or method. */
@@ -25,7 +19,7 @@ export interface HandlerParam {
     number: number;
     /** Result of original function/method when it is called before `handler`. */
     result?: any;
-    /** 
+    /**
      * Method that calls original function or method; by default values from `arg` will be used as arguments;
      * but you may pass arguments to `run` and they will be used instead of the original arguments.
      */
@@ -49,9 +43,7 @@ export interface HandlerParam {
     /** An object whose method was wrapped and replaced. */
     targetObj: TargetObject | null;
 }
-
-export type Handler = (param: HandlerParam) => any;
-
+export declare type Handler = (param: HandlerParam) => any;
 /** Settings of {@link wrap} function. */
 export interface WrapSettings {
     /**
@@ -81,17 +73,12 @@ export interface WrapSettings {
     data?: any;
     [field: string]: any;
 }
-
-export type Wrapper = TargetFunction;
-
-export type Unwrap = () => void;
-
-/* eslint-enable @typescript-eslint/no-explicit-any */
-
+export declare type Wrapper = TargetFunction;
+export declare type Unwrap = () => void;
 /**
  * Wraps specified object's method or standalone function into new (wrapping) function
  * that calls passed handler which may run wrapped function eventually.
- * 
+ *
  * @param target
  *   Function that should be wrapped or an object whose method will be wrapped and replaced.
  * @param method
@@ -105,103 +92,12 @@ export type Unwrap = () => void;
  *   Wrapping function when `target` is a function, or a function that restores original method when `target` is an object.
  * @author Denis Sikuler
  */
-export function wrap(target: TargetObject, method: string, handler: Handler, settings?: WrapSettings): Unwrap;
-export function wrap(target: TargetFunction, handler: Handler, settings?: WrapSettings): Wrapper;
-export function wrap(target: any, method: any, handler?: any, settings?: any): any {   // eslint-disable-line max-params, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
-    let number = 0;
-    const save = {};
-    let original: TargetFunction;
-    let targetObj: TargetObject | null;
-    if (typeof method === 'string') {
-        original = target[method];
-        targetObj = target;
-    }
-    /* eslint-disable no-param-reassign */
-    else {
-        original = target;
-        targetObj = null;
-        settings = handler;
-        handler = method;
-        method = target.name;
-    }
-    if (! settings) {
-        settings = {};
-    }
-    /* eslint-enable no-param-reassign */
-    const handlerContext = settings.context;
-
-    function wrapper(this: unknown): unknown {
-        // eslint-disable-next-line prefer-rest-params
-        const arg = Array.prototype.slice.call(arguments);
-        // eslint-disable-next-line consistent-this, no-invalid-this, @typescript-eslint/no-this-alias
-        const context = this;
-        const env: HandlerParam = {
-            arg,
-            context,
-            data: settings.data,
-            method,
-            number: ++number,
-            save,
-            settings,
-            target: original,
-            targetObj,
-            run,
-            runApply(firstArg) {
-                return original.apply(
-                    context,
-                    // eslint-disable-next-line no-nested-ternary
-                    arguments.length
-                        ? (Array.isArray(firstArg)
-                            ? firstArg
-                            : [firstArg]
-                        )
-                        : arg
-                );
-            }
-        };
-        let result;
-
-        function run(): unknown {
-            // eslint-disable-next-line multiline-ternary, prefer-rest-params
-            return original.apply(context, (arguments.length ? arguments : arg) as unknown[]);
-        }
-        
-        if (settings.before || settings.beforeResult) {
-            result = run();
-        }
-        env.result = result;
-        
-        env.result = handlerContext
-            ? handler.call(handlerContext, env)
-            : handler(env);
-
-        if (settings.after) {
-            result = run();
-        }
-        else if (! settings.beforeResult) {
-            result = env.result;
-        }
-        
-        return result;
-    }
-
-    if (targetObj) {
-        targetObj[method] = settings.bind
-            ? wrapper.bind(targetObj)
-            : wrapper;
-
-        return function unwrap(): void {
-            (targetObj as AnyObject)[method] = original;
-        };
-    }
-
-    return wrapper;
-}
-
+export declare function wrap(target: TargetObject, method: string, handler: Handler, settings?: WrapSettings): Unwrap;
+export declare function wrap(target: TargetFunction, handler: Handler, settings?: WrapSettings): Wrapper;
 /**
  * Wraps specified object's method(s) or standalone function into new (wrapping) function
  * that calls passed handler which may run wrapped function eventually.
- * 
+ *
  * @param target
  *   Function that should be wrapped or an object whose method(s) will be wrapped and replaced.
  * @param method
@@ -215,25 +111,6 @@ export function wrap(target: any, method: any, handler?: any, settings?: any): a
  *   Wrapping function when `target` is a function, or a function that restores original method(s) when `target` is an object.
  * @author Denis Sikuler
  */
-export function intercept(target: TargetObject, method: string | string[], handler: Handler, settings?: WrapSettings): Unwrap;
-export function intercept(target: TargetFunction, handler: Handler, settings?: WrapSettings): Wrapper;
-export function intercept(target: any, method: any, handler?: any, settings?: any): any {   // eslint-disable-line max-params, @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
-    if (Array.isArray(method)) {
-        const unwrapList: Unwrap[] = [];
-        for (let i = 0, len = method.length; i < len; i++) {
-            unwrapList.push( wrap(target, method[i], handler, settings) );
-        }
-
-        return unwrapList.length > 1
-            ? function unwrap(): void {
-                for (let i = 0, len = unwrapList.length; i < len; i++) {
-                    unwrapList[i]();
-                }
-            }
-            : unwrapList[0];
-    }
-
-    return wrap(target, method, handler, settings);
-}
-
+export declare function intercept(target: TargetObject, method: string | string[], handler: Handler, settings?: WrapSettings): Unwrap;
+export declare function intercept(target: TargetFunction, handler: Handler, settings?: WrapSettings): Wrapper;
 export default intercept;

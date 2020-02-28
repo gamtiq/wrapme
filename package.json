@@ -63,7 +63,6 @@
     "test": "tsdx test",
     "lint": "tsdx lint",
     "doc": "typedoc --out doc --readme README.md ./src",
-    "prepare": "tsdx build",
     "check": "npm run lint && npm test"
   },
   "peerDependencies": {},

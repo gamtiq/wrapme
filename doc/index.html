@@ -68,21 +68,23 @@
 					<h1>wrapme <a name="start"></a></h1>
 				</a>
 				<p><a href="http://badge.fury.io/js/wrapme"><img src="https://badge.fury.io/js/wrapme.png" alt="NPM version"></a></p>
-				<p>Functions to wrap other functions and methods and to change/enhance their behavior, functionality or usage.<br>Can be used for Aspect-oriented programming.</p>
+				<p>Functions to wrap other functions and fields/methods and to change/enhance their behavior, functionality or usage.<br>Can be used for Aspect-oriented programming.</p>
 				<a href="#features" id="features" style="color: inherit; text-decoration: none;">
 					<h3>Features</h3>
 				</a>
 				<ul>
-					<li>Wrap a single function/method (by <code>wrap</code>) or several methods at once (by <code>intercept</code>).</li>
-					<li>Call original function/method before (use <code>before</code> or <code>beforeResult</code> option),
+					<li>Wrap a single function/field/method (by <code>wrap</code>) or several fields and methods at once (by <code>intercept</code>).</li>
+					<li>Wrap only field&#39;s get operation (<code>get</code> option) or set operation (<code>set</code> option), or both (by default).</li>
+					<li>Provide special getter and/or setter for wrapped field if it is necessary.</li>
+					<li>Call original function/method or field&#39;s operation before (use <code>before</code> or <code>listen</code> option),
 					after (use <code>after</code> option) and/or inside <code>handler</code> (use <code>run()</code> or <code>runApply()</code>).</li>
-					<li>Totally control calling of original function/method inside <code>handler</code>: call depending on condition,
-					filter/validate passed arguments and/or provide another arguments.</li>
-					<li>Return result of original function/method or any other value from <code>handler</code>.</li>
+					<li>Totally control calling of original function/method or field&#39;s operation inside <code>handler</code>:
+					call depending on condition, filter/validate/convert passed arguments and/or provide another arguments.</li>
+					<li>Return result of original function/method or field&#39;s operation, or any other value from <code>handler</code>.</li>
 					<li>Save necessary data between <code>handler</code> calls.</li>
-					<li>Restore original methods when it is needed.</li>
+					<li>Restore original fields/methods when it is needed.</li>
 					<li>Does not have dependencies and can be used in ECMAScript 5+ environment.</li>
-					<li>Small size (minified version is about 1 Kb).</li>
+					<li>Small size.</li>
 				</ul>
 				<pre><code class="language-js"><span class="hljs-keyword">import</span> { intercept } <span class="hljs-keyword">from</span> <span class="hljs-string">'wrapme'</span>;
 
@@ -104,7 +106,7 @@
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">logger</span>(<span class="hljs-params">callData</span>) </span>{
     log.push({
-        <span class="hljs-attr">name</span>: callData.method,
+        <span class="hljs-attr">name</span>: callData.field,
         <span class="hljs-attr">args</span>: callData.arg,
         <span class="hljs-attr">result</span>: callData.result,
         <span class="hljs-attr">callNum</span>: callData.number,
@@ -112,7 +114,7 @@
     });
 }
 
-<span class="hljs-keyword">const</span> unwrap = intercept(api, <span class="hljs-string">'sum'</span>, logger, {<span class="hljs-attr">beforeResult</span>: <span class="hljs-literal">true</span>});
+<span class="hljs-keyword">const</span> unwrap = intercept(api, <span class="hljs-string">'sum'</span>, logger, {<span class="hljs-attr">listen</span>: <span class="hljs-literal">true</span>});
 
 api.sum(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>);   <span class="hljs-comment">// Returns 10, adds item to log</span>
 api.sum(<span class="hljs-number">1</span>, <span class="hljs-number">-1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">3</span>);   <span class="hljs-comment">// Returns 3, adds item to log</span>
@@ -178,6 +180,7 @@ unwrap();</code></pre>
 				<pre><code class="language-js"><span class="hljs-keyword">import</span> { intercept, wrap } <span class="hljs-keyword">from</span> <span class="hljs-string">'wrapme'</span>;
 
 <span class="hljs-keyword">const</span> api = {
+    <span class="hljs-attr">value</span>: <span class="hljs-number">1</span>,
     sum(...numList) {
         <span class="hljs-keyword">let</span> result = <span class="hljs-number">0</span>;
         <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> value <span class="hljs-keyword">of</span> numList) {
@@ -217,25 +220,27 @@ unwrap();</code></pre>
 <span class="hljs-keyword">const</span> log = [];
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">logger</span>(<span class="hljs-params">callData</span>) </span>{
-    callData.settings.log.push({
-        <span class="hljs-attr">name</span>: callData.method,
-        <span class="hljs-attr">args</span>: callData.arg,
-        <span class="hljs-attr">result</span>: callData.result,
-        <span class="hljs-attr">callNum</span>: callData.number,
-        <span class="hljs-attr">time</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime()
-    });
+    <span class="hljs-keyword">if</span> (! callData.byUnwrap) {
+        callData.settings.log.push({
+            <span class="hljs-attr">name</span>: callData.field,
+            <span class="hljs-attr">args</span>: callData.arg,
+            <span class="hljs-attr">result</span>: callData.result,
+            <span class="hljs-attr">callNum</span>: callData.number,
+            <span class="hljs-attr">time</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime()
+        });
+    }
 }
 
-<span class="hljs-keyword">const</span> unwrap = intercept(api, [<span class="hljs-string">'sum'</span>, <span class="hljs-string">'positive'</span>], logger, {<span class="hljs-attr">beforeResult</span>: <span class="hljs-literal">true</span>, log});
+<span class="hljs-keyword">const</span> unwrap = intercept(api, [<span class="hljs-string">'sum'</span>, <span class="hljs-string">'positive'</span>, <span class="hljs-string">'value'</span>], logger, {<span class="hljs-attr">listen</span>: <span class="hljs-literal">true</span>, log});
 
 api.sum(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>);   <span class="hljs-comment">// Returns 10, adds item to log</span>
 api.positive(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">-3</span>, <span class="hljs-number">0</span>, <span class="hljs-number">10</span>, <span class="hljs-number">-7</span>);   <span class="hljs-comment">// Returns [1, 2, 10], adds item to log</span>
-api.sum(<span class="hljs-number">1</span>, <span class="hljs-number">-1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">3</span>);   <span class="hljs-comment">// Returns 3, adds item to log</span>
+api.value += api.sum(<span class="hljs-number">1</span>, <span class="hljs-number">-1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">-2</span>, <span class="hljs-number">3</span>);   <span class="hljs-comment">// Returns 3, adds items to log</span>
 
-<span class="hljs-comment">// Restore original methods</span>
+<span class="hljs-comment">// Restore original fields</span>
 unwrap();
 
-api.positive(<span class="hljs-number">-1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>, <span class="hljs-number">-8</span>);   <span class="hljs-comment">// Returns [5], doesn't add item to log</span>
+api.positive(<span class="hljs-number">-1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">0</span>, api.value, <span class="hljs-number">-8</span>);   <span class="hljs-comment">// Returns [5, 4], doesn't add items to log</span>
 
 <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"call log:\n"</span>, <span class="hljs-built_in">JSON</span>.stringify(log, <span class="hljs-literal">null</span>, <span class="hljs-number">4</span>));
 <span class="hljs-comment">/* log looks like:
@@ -250,7 +255,7 @@ api.positive(<span class="hljs-number">-1</span>, <span class="hljs-number">5</s
             ],
             "result": 10,
             "callNum": 1,
-            "time": 1582642216821
+            "time": 1586602348174
         },
         {
             "name": "positive",
@@ -268,7 +273,14 @@ api.positive(<span class="hljs-number">-1</span>, <span class="hljs-number">5</s
                 10
             ],
             "callNum": 1,
-            "time": 1582642216822
+            "time": 1586602348174
+        },
+        {
+            "name": "value",
+            "args": [],
+            "result": 1,
+            "callNum": 1,
+            "time": 1586602348174
         },
         {
             "name": "sum",
@@ -281,7 +293,16 @@ api.positive(<span class="hljs-number">-1</span>, <span class="hljs-number">5</s
             ],
             "result": 3,
             "callNum": 2,
-            "time": 1582642216822
+            "time": 1586602348174
+        },
+        {
+            "name": "value",
+            "args": [
+                4
+            ],
+            "result": 4,
+            "callNum": 2,
+            "time": 1586602348175
         }
     ]
 */</span>
@@ -308,84 +329,139 @@ api.binomCoeff(<span class="hljs-number">10</span>, <span class="hljs-number">5<
 api.binomCoeff(<span class="hljs-number">10</span>, <span class="hljs-number">5</span>);   <span class="hljs-comment">// Uses already calculated value</span>
 
 
-<span class="hljs-comment">// Validation or filtering</span>
+<span class="hljs-comment">// Side effects</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">saveToLocalStorage</span>(<span class="hljs-params">callData</span>) </span>{
+    <span class="hljs-keyword">if</span> (callData.bySet) {
+        <span class="hljs-keyword">const</span> { save } = callData;
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">'id'</span> <span class="hljs-keyword">in</span> save) {
+            clearTimeout(save.id);
+        }
+
+        save.id = setTimeout(
+            <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> localStorage.setItem(
+                <span class="hljs-string">`wrap:<span class="hljs-subst">${callData.field}</span>`</span>,
+                <span class="hljs-keyword">typeof</span> callData.result === <span class="hljs-string">'undefined'</span>
+                    ? callData.arg0
+                    : callData.result
+            ),
+            callData.settings.timeout || <span class="hljs-number">0</span>
+        );
+    }
+}
+
+wrap(api, <span class="hljs-string">'value'</span>, saveToLocalStorage, {<span class="hljs-attr">listen</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">timeout</span>: <span class="hljs-number">50</span>});
+
+<span class="hljs-comment">// Validation, filtering or conversion</span>
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">filter</span>(<span class="hljs-params">callData</span>) </span>{
-    <span class="hljs-keyword">return</span> callData.runApply(
-        callData.arg.filter(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> <span class="hljs-keyword">typeof</span> item === <span class="hljs-string">'number'</span> &amp;&amp; ! <span class="hljs-built_in">isNaN</span>(item))
-    );
+    <span class="hljs-keyword">const</span> { arg, bySet } = callData;
+    <span class="hljs-keyword">const</span> argList = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> item <span class="hljs-keyword">of</span> arg) {
+        <span class="hljs-keyword">const</span> itemType = <span class="hljs-keyword">typeof</span> item;
+        <span class="hljs-keyword">if</span> ( (itemType === <span class="hljs-string">'number'</span> &amp;&amp; ! <span class="hljs-built_in">isNaN</span>(item))
+                || (bySet &amp;&amp; itemType === <span class="hljs-string">'string'</span> &amp;&amp; item &amp;&amp; (item = <span class="hljs-built_in">Number</span>(item))) ) {
+            argList.push(item);
+        }
+    }
+    <span class="hljs-keyword">if</span> (argList.length || ! bySet) {
+        <span class="hljs-keyword">return</span> callData.runApply(argList);
+    }
 }
+
+wrap(api, <span class="hljs-string">'value'</span>, filter);
+api.value = <span class="hljs-string">'some data'</span>;   <span class="hljs-comment">// value isn't changed, saveToLocalStorage isn't called</span>
+api.value = <span class="hljs-number">9</span>;   <span class="hljs-comment">// value is changed, saveToLocalStorage is called</span>
+api.value = <span class="hljs-string">'-53'</span>;   <span class="hljs-comment">// string is converted to number and value is changed, saveToLocalStorage is called</span>
 
 <span class="hljs-keyword">const</span> sum = wrap(api.sum, filter);
 <span class="hljs-keyword">const</span> positive = wrap(api.positive, filter);
 
-sum(<span class="hljs-literal">false</span>, <span class="hljs-number">3</span>, <span class="hljs-literal">NaN</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(), <span class="hljs-number">8</span>, {}, <span class="hljs-string">'sum'</span>);   <span class="hljs-comment">// Returns 11</span>
+sum(<span class="hljs-literal">false</span>, <span class="hljs-number">3</span>, <span class="hljs-literal">NaN</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(), <span class="hljs-number">8</span>, {}, <span class="hljs-string">'sum'</span>, <span class="hljs-string">'2'</span>);   <span class="hljs-comment">// Returns 11</span>
 positive(<span class="hljs-literal">true</span>, <span class="hljs-number">-5</span>, <span class="hljs-literal">NaN</span>, <span class="hljs-number">4</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(), <span class="hljs-number">1</span>, {<span class="hljs-attr">a</span>: <span class="hljs-number">5</span>}, <span class="hljs-number">0</span>, <span class="hljs-string">'positive'</span>, <span class="hljs-number">-1</span>);   <span class="hljs-comment">// Returns [4, 1]</span></code></pre>
 				<p>See additional examples in tests.</p>
 				<a href="#api-a-nameapia-a-hrefstartx2191a" id="api-a-nameapia-a-hrefstartx2191a" style="color: inherit; text-decoration: none;">
 					<h2>API <a name="api"></a> <a href="#start">&#x2191;</a></h2>
 				</a>
-				<a href="#wraptarget-method-handler-settings-function" id="wraptarget-method-handler-settings-function" style="color: inherit; text-decoration: none;">
-					<h3>wrap(target, method, handler?, settings?): Function</h3>
+				<a href="#wraptarget-field-handler-settings-function" id="wraptarget-field-handler-settings-function" style="color: inherit; text-decoration: none;">
+					<h3>wrap(target, field, handler?, settings?): Function</h3>
 				</a>
-				<p>Wraps specified object&#39;s method or standalone function into new (wrapping) function
-				that calls passed handler which may run wrapped function eventually.</p>
+				<p>Wraps specified object&#39;s field/method or standalone function into new (wrapping) function
+				that calls passed handler which eventually may run wrapped function or get/set field&#39;s value.</p>
 				<p>Arguments:</p>
 				<ul>
-					<li><code>target: Function | object</code> - Function that should be wrapped or an object whose method will be wrapped and replaced.</li>
-					<li><code>method: Function | string</code> - Name of method that should be wrapped or a handler when function is passed for <code>target</code> parameter.</li>
-					<li><code>handler: Function | object</code> - A function (interceptor) that should be executed when newly created function is called,
+					<li><code>target: Function | object</code> - Function that should be wrapped or an object whose field/method will be wrapped and replaced.</li>
+					<li><code>field: Function | string</code> - Name of field/method that should be wrapped or a handler when function is passed for <code>target</code> parameter.</li>
+					<li><code>handler: Function | object</code> - A function (interceptor) that should be executed when newly created function is called or get/set operation for the field is applied,
 					or optional settings when function is passed for <code>target</code> parameter.</li>
 					<li><code>settings: object</code> - Optional settings that will be available in <code>handler</code>.</li>
-					<li><code>settings.after: boolean</code> (optional) - Whether original function or method should be called after <code>handler</code>.</li>
-					<li><code>settings.before: boolean</code> (optional) - Whether original function or method should be called before <code>handler</code>.</li>
-					<li><code>settings.beforeResult: boolean</code> (optional) - Whether original function or method should be called before <code>handler</code>
-					and whether original&#39;s result should be returned.</li>
+					<li><code>settings.after: boolean</code> (optional) - Whether original function, method or field&#39;s operation should be called after <code>handler</code>.</li>
+					<li><code>settings.before: boolean</code> (optional) - Whether original function, method or field&#39;s operation should be called before <code>handler</code>.</li>
 					<li><code>settings.bind: boolean</code> (optional) - Whether wrapping function should be bound to <code>target</code> object.</li>
 					<li><code>settings.context: object</code> (optional) - Context (<code>this</code>) that should be used for <code>handler</code> call.</li>
 					<li><code>settings.data: any</code> (optional) - Any data that should be available in <code>handler</code>.</li>
+					<li><code>settings.get: boolean | Function</code> (optional) - Whether field&#39;s get operation should be intercepted
+						and whether created wrapping function should be used as field&#39;s getter
+					(by default <code>true</code> for usual (non-functional) field and <code>false</code> for method).</li>
+					<li><code>settings.listen: boolean</code> (optional) - Whether original function, method or field&#39;s operation
+					should be called before <code>handler</code> and whether original&#39;s result should be returned.</li>
+					<li><code>settings.set: boolean | Function</code> (optional) - Whether field&#39;s set operation should be intercepted
+						and whether created wrapping function should be used as field&#39;s setter
+					(by default <code>true</code> for usual (non-functional) field and <code>false</code> for method).</li>
 				</ul>
 				<p>Returns wrapping function when <code>target</code> is a function,
-				or a function that restores original method when <code>target</code> is an object.</p>
+				or a function that restores original field/method when <code>target</code> is an object.</p>
 				<p>An object with the following fields will be passed into <code>handler</code>:</p>
 				<ul>
-					<li><code>arg: any[]</code> - array of arguments that were passed to the wrapping function or method.</li>
-					<li><code>context: object</code> - context (<code>this</code>) with which wrapping function is called.</li>
-					<li><code>data: any</code> - value of <code>settings.data</code> option.</li>
-					<li><code>method: string</code> - name of the method or function that was wrapped.</li>
-					<li><code>number: number</code> - number of <code>handler</code>&#39;s call (starting from 1).</li>
-					<li><code>result: any</code> - result of original function/method when it is called before <code>handler</code>.</li>
-					<li><code>run: (...args?) =&gt; any</code> - method that calls original function or method;
+					<li><code>arg: any[]</code> - Array of arguments that were passed to the wrapping function.</li>
+					<li><code>arg0: any</code> - Value of <code>arg[0]</code>.</li>
+					<li><code>byCall: boolean</code> - Whether wrapping function is called as object&#39;s method or as usual function (by a call operation).</li>
+					<li><code>byGet: boolean</code> - Whether wrapping function is called to get field&#39;s value (by get operation, as field&#39;s getter).</li>
+					<li><code>bySet: boolean</code> - Whether wrapping function is called to set field&#39;s value (by set operation, as field&#39;s setter).</li>
+					<li><code>byUnwrap: boolean</code> - Whether wrapping function (and <code>handler</code>) is called during unwrapping.</li>
+					<li><code>context: object</code> - Context (<code>this</code>) with which wrapping function is called.</li>
+					<li><code>data: any</code> - Value of <code>settings.data</code> option.</li>
+					<li><code>field: string | undefined</code> - Name of the field or method that was wrapped.</li>
+					<li><code>fieldWrap: boolean</code> - Whether field&#39;s get and/or set operation was wrapped.</li>
+					<li><code>funcWrap: boolean</code> - Whether standalone function (not object&#39;s field/method) was wrapped.</li>
+					<li><code>get: (() =&gt; any) | undefined</code> - Function that returns field&#39;s current value if field was wrapped.</li>
+					<li><code>method: string</code> - Name of the method or function that was wrapped.</li>
+					<li><code>methodWrap: boolean</code> - Whether method was wrapped.</li>
+					<li><code>number: number</code> - Number of <code>handler</code>&#39;s call (starting from 1).</li>
+					<li><code>result: any</code> - Result of original function/method when it is called before <code>handler</code>.</li>
+					<li><code>run: (...args?) =&gt; any</code> - Method that calls original function/method or field&#39;s getter/setter;
 						by default values from <code>arg</code> will be used as arguments;
 					but you may pass arguments to <code>run</code> and they will be used instead of the original arguments.</li>
-					<li><code>runApply: (any[]?) =&gt; any</code> - similar to <code>run</code> but accepts an array of new arguments,
+					<li><code>runApply: (any[]?) =&gt; any</code> - Similar to <code>run</code> but accepts an array of new arguments,
 						e.g. <code>runApply([1, 2, 3])</code> is equivalent to <code>run(1, 2, 3)</code>;
 						if the first argument of <code>runApply</code> is not an array it will be wrapped into array (i.e. <code>[arguments[0]]</code>);
 					only the first argument  of <code>runApply</code> is used.</li>
-					<li><code>save: object</code> - an object that can be used to preserve some values between <code>handler</code> calls.</li>
-					<li><code>settings: object</code> - value of <code>settings</code> parameter; except for <code>settings.bind</code> and <code>settings.context</code>,
+					<li><code>save: object</code> - An object that can be used to preserve some values between <code>handler</code> calls.</li>
+					<li><code>set: ((value: any) =&gt; any) | undefined</code> - Function that changes field&#39;s current value if field was wrapped.</li>
+					<li><code>settings: object</code> - Value of <code>settings</code> parameter; except for <code>settings.bind</code> and <code>settings.context</code>,
 						it is possible to change any setting to alter following execution;
 					so be careful when you change a field&#39;s value of <code>settings</code> object.</li>
-					<li><code>target: (...args) =&gt; any</code> - original function or method that was wrapped.</li>
-					<li><code>targetObj: object | null</code> - an object whose method was wrapped and replaced.</li>
+					<li><code>target: ((...args) =&gt; any) | string</code> - Original function or method that was wrapped, or name of wrapped field.</li>
+					<li><code>targetObj: object | null</code> - An object whose field/method was wrapped and replaced.</li>
+					<li><code>value: any</code> - Previous value returned by wrapping function.</li>
 				</ul>
-				<p>When <code>settings.after</code> and <code>settings.beforeResult</code> are <code>false</code>, result of <code>handler</code> will be returned from wrapping function.</p>
-				<a href="#intercepttarget-method-handler-settings-function" id="intercepttarget-method-handler-settings-function" style="color: inherit; text-decoration: none;">
-					<h3>intercept(target, method, handler?, settings?): Function</h3>
+				<p>When <code>settings.after</code> and <code>settings.listen</code> are <code>false</code>, result of <code>handler</code> will be returned from wrapping function.</p>
+				<a href="#intercepttarget-field-handler-settings-function" id="intercepttarget-field-handler-settings-function" style="color: inherit; text-decoration: none;">
+					<h3>intercept(target, field, handler?, settings?): Function</h3>
 				</a>
-				<p>Wraps specified object&#39;s method(s) or standalone function into new (wrapping) function
-				that calls passed handler which may run wrapped function eventually.</p>
+				<p>Wraps specified object&#39;s field(s)/method(s) or standalone function into new (wrapping) function
+				that calls passed handler which eventually may run wrapped function or get/set field&#39;s value.</p>
 				<p>Arguments:</p>
 				<ul>
-					<li><code>target: Function | object</code> - Function that should be wrapped or an object whose method(s) will be wrapped and replaced.</li>
-					<li><code>method: Function | string | string[]</code> - Name of method (or list of method names) that should be wrapped
-					or a handler when function is passed for <code>target</code> parameter.</li>
-					<li><code>handler: Function | object</code> - A function (interceptor) that should be executed when newly created function is called,
-					or optional settings when function is passed for <code>target</code> parameter. See <code>wrap</code> for details.</li>
+					<li><code>target: Function | object</code> - Function that should be wrapped or an object whose field(s)/method(s) will be wrapped and replaced.</li>
+					<li><code>field: Function | string | string[]</code> - Name of field/method (or list of field/method names)
+					that should be wrapped or a handler when function is passed for <code>target</code> parameter.</li>
+					<li><code>handler: Function | object</code> - A function (interceptor) that should be executed when newly created function is called
+					or get/set operation for the field is applied, or settings when function is passed for <code>target</code> parameter.</li>
 					<li><code>settings: object</code> - Optional settings that will be available in <code>handler</code>. See <code>wrap</code> for details.</li>
 				</ul>
 				<p>Returns wrapping function when <code>target</code> is a function,
-				or a function that restores original method(s) when <code>target</code> is an object.</p>
+				or a function that restores original field(s)/method(s) when <code>target</code> is an object.</p>
 				<p>See <code>doc</code> folder for details.</p>
 				<a href="#related-projects-a-namerelateda-a-hrefstartx2191a" id="related-projects-a-namerelateda-a-hrefstartx2191a" style="color: inherit; text-decoration: none;">
 					<h2>Related projects <a name="related"></a> <a href="#start">&#x2191;</a></h2>

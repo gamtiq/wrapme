@@ -77,17 +77,22 @@
     "cover": "tsdx test --coverage --coverageReporters=text --coverageReporters=html",
     "lint": "tsdx lint",
     "doc": "typedoc --gitRevision master --out doc --readme README.md ./src",
-    "check": "npm run lint && npm test"
+    "check": "npm run lint && npm test",
+    "all": "npm run check && npm run build && npm run doc",
+    "release": "bump patch --commit --tag --all --push",
+    "release-minor": "bump minor --commit --tag --all --push",
+    "release-major": "bump major --commit --tag --all --push"
   },
   "peerDependencies": {},
   "devDependencies": {
-    "@types/jest": "^25.1.1",
+    "@jsdevtools/version-bump-prompt": "6.0.3",
+    "@types/jest": "25.2.1",
     "eslint-config-guard": "1.1.0",
-    "husky": "^4.2.1",
-    "tsdx": "^0.12.3",
-    "tslib": "^1.10.0",
-    "typedoc": "0.16.10",
-    "typescript": "^3.7.5"
+    "husky": "4.2.5",
+    "tsdx": "0.13.1",
+    "tslib": "1.11.1",
+    "typedoc": "0.17.4",
+    "typescript": "3.8.3"
   },
   "dependencies": {}
 }

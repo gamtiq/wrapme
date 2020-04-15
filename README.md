@@ -409,7 +409,7 @@ or get/set operation for the field is applied, or settings when function is pass
 Returns wrapping function when `target` is a function,
 or a function that restores original field(s)/method(s) when `target` is an object.
 
-See `doc` folder for details.
+See [`docs`](https://gamtiq.github.io/wrapme/) for details.
 
 ## Related projects <a name="related"></a> [&#x2191;](#start)
 

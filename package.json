@@ -1,6 +1,6 @@
 {
   "name": "wrapme",
-  "description": "Functions to wrap other functions and methods and to change/enhance their behavior, functionality or usage",
+  "description": "Functions to wrap other functions and fields/methods and to change/enhance their behavior, functionality or usage",
   "version": "1.1.0",
   "license": "MIT",
   "main": "dist/index.js",
@@ -76,7 +76,7 @@
     "test": "tsdx test",
     "cover": "tsdx test --coverage --coverageReporters=text --coverageReporters=html",
     "lint": "tsdx lint",
-    "doc": "typedoc --gitRevision master --out doc --readme README.md ./src",
+    "doc": "typedoc --gitRevision master --out docs --readme README.md ./src",
     "check": "npm run lint && npm test",
     "all": "npm run check && npm run build && npm run doc",
     "release": "bump patch --commit --tag --all --push",
@@ -92,6 +92,7 @@
     "tsdx": "0.13.1",
     "tslib": "1.11.1",
     "typedoc": "0.17.4",
+    "typedoc-plugin-nojekyll": "1.0.1",
     "typescript": "3.8.3"
   },
   "dependencies": {}

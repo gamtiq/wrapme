@@ -177,7 +177,7 @@ const unwrap = intercept(api, ['sum', 'positive', 'value'], logger, {listen: tru
 
 api.sum(1, 2, 3, 4);   // Returns 10, adds item to log
 api.positive(1, 2, -3, 0, 10, -7);   // Returns [1, 2, 10], adds item to log
-api.value += api.sum(1, -1, 2, -2, 3);   // Returns 3, adds items to log
+api.value += api.sum(1, -1, 2, -2, 3);   // Changes value to 4, adds items to log
 
 // Restore original fields
 unwrap();

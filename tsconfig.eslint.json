@@ -3,5 +3,8 @@
     "include": [
         "src/**/*.ts",
         "test/**/*.ts"
+    ],
+    "exclude": [
+        "typedoc-conf.js"
     ]
 }

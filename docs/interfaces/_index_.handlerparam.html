@@ -7,13 +7,63 @@
 	<meta name="description" content="Documentation for wrapme">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<style>
+        .tsd-page-toolbar .header__project {
+            color: #581362;
+            font-weight: bold;
+        }
+
+        .tsd-page-toolbar .header__link {
+            color: #212881;
+            font-size: 14px;
+        }
+
+        .tsd-page-toolbar a.header__link_normal {
+            font-weight: normal;
+        }
+
+        .tsd-page-toolbar {
+            background: #f1f7f7;
+        }
+
+        .go-top {
+            background: #cae1e1;
+            border-radius: 4px;
+            bottom: 20px;
+            display: none;
+            height: 40px;
+            opacity: 0.7;
+            position: fixed;
+            right: 20px;
+            width: 40px;
+        }
+        .go-top:hover {
+            border: 1px solid #4c5e80;
+            box-sizing: border-box;
+            opacity: 1;
+        }
+        .go-top_show {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
+        .go-top::after {
+            border-bottom: 20px solid #4c5e80;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            content: '';
+            height: 0;
+            width: 0;
+        }
+        
+    </style>
 </head>
 <body>
 <header>
 	<div class="tsd-page-toolbar">
 		<div class="container">
 			<div class="table-wrap">
-				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
 					<div class="field">
 						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
 						<input id="tsd-search-field" type="text" />
@@ -22,8 +72,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">wrapme</a>
-				</div>
+				&lparlt; <a href="../index.html" class="title header__project">wrapme</a> &rpargt;<a href="https://github.com/gamtiq/wrapme" class="title header__link" target="_blank" style="margin-left: 3rem;">GitHub repo</a>                </div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
 						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
@@ -671,7 +720,20 @@
 	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
+<a href="#top" class="go-top"></a>
 <script src="../assets/js/main.js"></script>
 <script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+<script>
+    typedoc.lightTheme = {};
+    typedoc.lightTheme.onScroll = function onScroll(event) {
+        document.getElementsByClassName('go-top')[0].classList[
+            event.detail.scrollTop > document.documentElement.clientHeight * 80 * 0.01
+                ? 'add'
+                : 'remove'
+        ]('go-top_show');
+    };
+    typedoc.viewport.addEventListener('scroll', typedoc.lightTheme.onScroll);
+    
+</script>
 </body>
 </html>

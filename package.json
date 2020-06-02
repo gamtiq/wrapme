@@ -76,7 +76,7 @@
     "test": "tsdx test",
     "cover": "tsdx test --coverage --coverageReporters=text --coverageReporters=html",
     "lint": "tsdx lint",
-    "doc": "typedoc --gitRevision master --out docs --readme README.md ./src",
+    "doc": "typedoc --options typedoc-conf.js --gitRevision master --out docs --readme README.md --theme ./node_modules/typedoc-light-theme/src ./src",
     "check": "npm run lint && npm test",
     "all": "npm run check && npm run build && npm run doc",
     "release": "bump patch --commit --tag --all --push",
@@ -91,8 +91,8 @@
     "husky": "4.2.5",
     "tsdx": "0.13.1",
     "tslib": "1.11.1",
-    "typedoc": "0.17.4",
-    "typedoc-plugin-nojekyll": "1.0.1",
+    "typedoc": "0.17.7",
+    "typedoc-light-theme": "^1.0.0",
     "typescript": "3.8.3"
   },
   "dependencies": {}

@@ -3,8 +3,8 @@ var packageData = require("./package.json");
 module.exports = {
     "projectName": {
         "link": true,
-        "before": "&lparlt; ",
-        "after": " &rpargt;"
+        "before": '<span class="title">&lparlt; </span>',
+        "after": '<span class="title"> &rpargt;</span>'
     },
     "links": [
         {
